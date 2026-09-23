@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="TypeSafe.Client\**" />
+    <EmbeddedResource Remove="TypeSafe.Client\**" />
+    <Content Remove="TypeSafe.Client\**" />
+    <None Remove="TypeSafe.Client\**" />
+  </ItemGroup>
+
+</Project>
