@@ -22,7 +22,7 @@ Environment override: `TYPESAFE__ApiKey=ts-...`, `MCP__MaxBatchItems=100`, etc.
 ```json
 {
   "mcpServers": {
-	"jev-eval": { "command": "MCP/MCP/bin/Debug/net10.0/JevMcp.exe" }
+	"jev-eval": { "command": "MCP/bin/Debug/net10.0/JevMcp.exe" }
   }
 }
 ```

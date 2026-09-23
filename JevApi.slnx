@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="MCP/MCP/MCP.csproj" Id="797f0c51-c664-4b53-95e3-e2e3879a3f26" />
+  <Project Path="MCP/MCP.csproj" />
   <Project Path="TypeSafe.Client\TypeSafe.Client.csproj" />
 </Solution>

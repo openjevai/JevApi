@@ -18,7 +18,7 @@ A user-friendly, AOT-safe .NET client library for the Jev evaluation API (`POST 
 
 See [TypeSafe.Client/README.md](TypeSafe.Client/README.md) for usage examples.
 
-### JevMcp (`MCP/MCP`)
+### JevMcp (`MCP`)
 
 A stdio [MCP](https://modelcontextprotocol.io) server (built on [MCPSharp](https://github.com/afrise/MCPSharp)) that wraps `TypeSafe.Client` and exposes Jev to LLM agents as tools, with schemas and descriptions designed for agent consumption:
 
@@ -31,7 +31,7 @@ A stdio [MCP](https://modelcontextprotocol.io) server (built on [MCPSharp](https
 
 Results preserve raw probabilities and confidence (never reduced to booleans), include `request_id` / `latency_ms` / token usage, surface truncation warnings, and return structured errors (`malformed_question`, `state_too_large`, `rate_limited`, ...).
 
-Configuration via `appsettings.json` or environment variables (`TYPESAFE__ApiKey`). See [MCP/MCP/README.md](MCP/MCP/README.md).
+Configuration via `appsettings.json` or environment variables (`TYPESAFE__ApiKey`). See [MCP/README.md](MCP/README.md).
 
 ## Getting started
 
@@ -39,4 +39,4 @@ Configuration via `appsettings.json` or environment variables (`TYPESAFE__ApiKey
 dotnet build JevApi.slnx
 ```
 
-Set your TypeSafe API key in `MCP/MCP/appsettings.json` (`TypeSafe:ApiKey`) or via the `TYPESAFE__ApiKey` environment variable, then point your MCP client at the built `JevMcp` executable.
+Set your TypeSafe API key in `MCP/appsettings.json` (`TypeSafe:ApiKey`) or via the `TYPESAFE__ApiKey` environment variable, then point your MCP client at the built `JevMcp` executable.
