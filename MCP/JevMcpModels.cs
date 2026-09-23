@@ -276,3 +276,24 @@ public sealed class ValidateResponse
     [JsonPropertyName("results")]
     public required List<QuestionValidation> Results { get; set; }
 }
+
+/// <summary>Result of a <c>health</c> call. Free — makes no upstream call.</summary>
+public sealed class HealthResponse
+{
+    /// <summary>True when an API key is configured (not verified against the API).</summary>
+    [JsonPropertyName("api_key_configured")]
+    public bool ApiKeyConfigured { get; set; }
+
+    /// <summary>The configured model name.</summary>
+    [JsonPropertyName("model")]
+    public required string Model { get; set; }
+
+    /// <summary>The configured API base address.</summary>
+    [JsonPropertyName("base_address")]
+    public required string BaseAddress { get; set; }
+
+    /// <summary>Non-fatal setup warnings, e.g. a missing API key.</summary>
+    [JsonPropertyName("warnings")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Warnings { get; set; }
+}

@@ -27,14 +27,25 @@ public sealed class JevEvaluator
 {
     private readonly TypeSafeClient _client;
     private readonly McpServerOptions _options;
+    private readonly TypeSafeClientOptions _clientOptions;
 
-    public JevEvaluator(TypeSafeClient client, McpServerOptions options)
+    public JevEvaluator(TypeSafeClient client, McpServerOptions options, TypeSafeClientOptions clientOptions)
     {
         _client = client;
         _options = options;
+        _clientOptions = clientOptions;
     }
 
     public McpServerOptions Options => _options;
+
+    /// <summary>True when a non-empty API key is configured (does not verify it against the API).</summary>
+    public bool HasApiKey => !string.IsNullOrWhiteSpace(_clientOptions.ApiKey);
+
+    /// <summary>The configured model name.</summary>
+    public string Model => _clientOptions.Model;
+
+    /// <summary>The configured API base address.</summary>
+    public string BaseAddress => _clientOptions.BaseAddress.ToString();
 
     /// <summary>Truncates text to <paramref name="limit"/> characters; returns the (possibly shortened) text and a warning.</summary>
     public static (string Text, string? Warning) Truncate(string text, int limit)

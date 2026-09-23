@@ -34,6 +34,6 @@ internal static class JevMcpRuntime
             httpClient.Timeout = timeout;
 
         var client = new TypeSafeClient(httpClient, Microsoft.Extensions.Options.Options.Create(typeSafeOptions));
-        return new JevEvaluator(client, mcpOptions);
+        return new JevEvaluator(client, mcpOptions, typeSafeOptions);
     }
 }

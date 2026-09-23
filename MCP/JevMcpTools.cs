@@ -109,7 +109,6 @@ public sealed class JevMcpTools
             var overall = System.Diagnostics.Stopwatch.StartNew();
             var results = new List<BatchItemResult>(items.Count);
             var gate = new SemaphoreSlim(Math.Max(1, _evaluator.Options.BatchParallelism));
-            var model = _evaluatorModelFallback;
 
             var tasks = items.Select(async item =>
             {
@@ -118,24 +117,23 @@ public sealed class JevMcpTools
                 {
                     var (text, _) = JevEvaluator.Truncate(item.Content ?? string.Empty, _evaluator.Options.MaxItemCharacters);
                     var (questionResults, raw, latencyMs) = await _evaluator.EvaluateAsync(text, questions, CancellationToken.None);
-                    model = raw.Model;
-                    return new BatchItemResult
+                    return (Model: raw.Model, Result: new BatchItemResult
                     {
                         ItemId = item.Id,
                         Results = questionResults,
                         Truncated = text.Length < (item.Content?.Length ?? 0),
                         Usage = new TokenUsage { InputTokens = raw.Usage.InputTokens, OutputTokens = raw.Usage.OutputTokens },
                         LatencyMs = Math.Round(latencyMs, 1),
-                    };
+                    });
                 }
                 catch (Exception ex)
                 {
-                    return new BatchItemResult
+                    return (Model: (string?)null, Result: new BatchItemResult
                     {
                         ItemId = item.Id,
                         IsError = true,
                         Error = ToError(ex),
-                    };
+                    });
                 }
                 finally
                 {
@@ -143,7 +141,9 @@ public sealed class JevMcpTools
                 }
             }).ToArray();
 
-            results.AddRange(await Task.WhenAll(tasks));
+            var completed = await Task.WhenAll(tasks);
+            results.AddRange(completed.Select(c => c.Result));
+            var model = completed.Select(c => c.Model).FirstOrDefault(m => m is not null) ?? _evaluatorModelFallback;
             overall.Stop();
 
             var response = new BatchResponse
@@ -245,6 +245,27 @@ public sealed class JevMcpTools
         return Task.FromResult(examples.ToJsonString());
     }
 
+    [McpTool("health",
+        "Check server configuration WITHOUT spending an evaluation or calling the Jev API. USE WHEN setting up or " +
+        "troubleshooting: confirms whether an API key is configured, which model and base address are in effect, and the " +
+        "active size limits. USE THIS FIRST after configuring credentials so a bad/missing key surfaces here instead of as an " +
+        "'unauthorized' error on your first real evaluate call. Free — no upstream call; it does not verify the key against the API.")]
+    public Task<string> HealthAsync()
+    {
+        var warnings = _evaluator.HasApiKey
+            ? null
+            : new List<string> { "no API key configured — set TypeSafe:ApiKey in appsettings.json or the TYPESAFE__ApiKey environment variable; evaluate/evaluate_batch will return 'unauthorized'." };
+
+        var response = new HealthResponse
+        {
+            ApiKeyConfigured = _evaluator.HasApiKey,
+            Model = _evaluator.Model,
+            BaseAddress = _evaluator.BaseAddress,
+            Warnings = warnings,
+        };
+        return Task.FromResult(JsonSerializer.Serialize(response, McpJsonContext.Default.HealthResponse));
+    }
+
     private static string NewRequestId() => Guid.NewGuid().ToString("N")[..12];
 
     private static string SerializeError(Exception ex) =>
@@ -309,19 +330,17 @@ internal static class QuestionValidator
         if (string.IsNullOrWhiteSpace(question.Question) && question.Type?.Trim().ToLowerInvariant() is not "noul")
             issues.Add("missing 'question' — a natural-language prompt is required for choice and score questions.");
 
-        // Check every natural-language field (question and statement) for compound phrasing.
-        var texts = new[] { question.Question, question.Statement }
-            .Where(t => !string.IsNullOrWhiteSpace(t))
-            .Select(t => t!.ToLowerInvariant())
-            .ToArray();
-        foreach (var text in texts)
+        // Only check the 'question' field for compound phrasing. Noul statements often quote
+        // source phrasing verbatim ("X failed and support was notified") which is one atomic
+        // claim; conjunctions there are not a signal of a compound judgment.
+        if (!string.IsNullOrWhiteSpace(question.Question))
         {
+            var text = question.Question.ToLowerInvariant();
             var hit = CompoundMarkers.FirstOrDefault(m => text.Contains(m.Marker, StringComparison.Ordinal));
             if (hit.Marker is not null)
             {
                 issues.Add($"phrasing contains '{hit.Marker.Trim()}' — {hit.Hint}.");
-                rewrites.AddRange(SuggestSplit(question));
-                break;
+                rewrites.AddRange(SuggestSplit(question.Question));
             }
         }
 
@@ -353,12 +372,8 @@ internal static class QuestionValidator
         };
     }
 
-    private static IEnumerable<string> SuggestSplit(McpQuestion question)
+    private static IEnumerable<string> SuggestSplit(string text)
     {
-        // Prefer the field that actually carries the natural-language judgment for this type.
-        var text = !string.IsNullOrWhiteSpace(question.Statement) ? question.Statement
-            : !string.IsNullOrWhiteSpace(question.Question) ? question.Question
-            : string.Empty;
         foreach (var separator in new[] { " and ", " or ", " as well as " })
         {
             var parts = text.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
