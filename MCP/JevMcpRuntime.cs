@@ -26,8 +26,16 @@ internal static class JevMcpRuntime
         var mcpOptions = new McpServerOptions();
         config.GetSection("Mcp").Bind(mcpOptions);
 
+        var openjevOptions = new OpenJevOptions();
+        config.GetSection("OpenJev").Bind(openjevOptions);
+
+        // Optional OpenJEV (community gateway) support. TypeSafe stays the default; OpenJEV is used
+        // only when explicitly requested (JEV_PROVIDER=openjev / OpenJev:Provider / TypeSafe:Provider)
+        // or when no TypeSafe key is configured but an OpenJEV key is. See OPENJEV.md.
+        typeSafeOptions = OpenJev.Resolve(typeSafeOptions, openjevOptions);
+
         if (string.IsNullOrWhiteSpace(typeSafeOptions.ApiKey))
-            Console.Error.WriteLine("JevMcp: no API key configured. Set TypeSafe:ApiKey in appsettings.json or the TYPESAFE__ApiKey environment variable; tool calls will return 'unauthorized'.");
+            Console.Error.WriteLine("JevMcp: no API key configured. Set TypeSafe:ApiKey in appsettings.json, the TYPESAFE__ApiKey environment variable, or use OpenJEV (OPENJEV_API_KEY / JEV_PROVIDER=openjev); tool calls will return 'unauthorized'.");
 
         var httpClient = new HttpClient { BaseAddress = typeSafeOptions.BaseAddress };
         if (typeSafeOptions.Timeout is { } timeout)

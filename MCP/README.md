@@ -17,6 +17,10 @@ Jev evaluates typed **questions** against a **state** and returns structured res
 
 Environment override: `TYPESAFE__ApiKey=ts-...`, `MCP__MaxBatchItems=100`, etc.
 
+### OpenJEV (optional community gateway)
+
+TypeSafe stays the default. To use [OpenJEV](https://openjev.sh) — a free community gateway to the same Jev model — instead, set `OPENJEV_API_KEY` (or `JEV_PROVIDER=openjev`); you can also add an `OpenJev` section to `appsettings.json`. The endpoint and model switch automatically; nothing else changes. See `OPENJEV.md`.
+
 2. Point your MCP client at the built executable, e.g. in an MCP client config:
 
 ```json

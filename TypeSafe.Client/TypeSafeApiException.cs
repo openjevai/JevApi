@@ -20,8 +20,8 @@ public class TypeSafeApiException : HttpRequestException
     /// <summary>True when the failure was 422 Unprocessable Entity (request validation failed).</summary>
     public bool IsValidationError => StatusCode == (HttpStatusCode)422;
 
-    /// <summary>True when the failure was 529 (TypeSafe temporarily overloaded).</summary>
-    public bool IsOverloaded => (int)StatusCode == 529;
+    /// <summary>True when the failure was 529 (TypeSafe overloaded) or 503 (OpenJEV gateway overloaded).</summary>
+    public bool IsOverloaded => (int)StatusCode == 529 || StatusCode == HttpStatusCode.ServiceUnavailable;
 
     internal TypeSafeApiException(HttpStatusCode statusCode, string? responseBody)
         : base($"TypeSafe API request failed with status {(int)statusCode} ({statusCode}).{(string.IsNullOrWhiteSpace(responseBody) ? null : $" Body: {responseBody}")}",

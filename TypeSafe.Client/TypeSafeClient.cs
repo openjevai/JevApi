@@ -153,7 +153,7 @@ public sealed class TypeSafeClient
     }
 
     private static bool IsTransient(HttpStatusCode statusCode) =>
-        statusCode == (HttpStatusCode)429 || (int)statusCode == 529;
+        statusCode == (HttpStatusCode)429 || (int)statusCode == 529 || statusCode == HttpStatusCode.ServiceUnavailable;
 
     private TimeSpan GetRetryDelay(HttpResponseMessage response, int attempt)
     {

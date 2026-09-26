@@ -4,6 +4,34 @@ A user-friendly .NET client library for the [TypeSafe AI](https://docs.typesafe.
 
 Evaluate a `state` against a map of typed questions and get back structured answers — one per question.
 
+## OpenJEV (optional community gateway)
+
+Jev is built by [TypeSafe](https://typesafe.ai). This fork keeps TypeSafe as the default and adds optional support for [OpenJEV](https://openjev.sh), a free community gateway to the same Jev model. Anyone with a TypeSafe key sees no behaviour change.
+
+Provider selection (see `OpenJev.Resolve` and `OPENJEV.md`):
+
+1. An explicit provider wins — `JEV_PROVIDER=openjev` env var, or `OpenJev:Provider` / `TypeSafe:Provider` config.
+2. Otherwise TypeSafe when its key is set (the unchanged default).
+3. Otherwise OpenJEV when `OPENJEV_API_KEY` (env) or `OpenJev:ApiKey` (config) is set.
+
+```csharp
+// TypeSafe is the default. To route through OpenJEV (the same Jev model), set OPENJEV_API_KEY and
+// let OpenJev.Resolve swap the endpoint and model for you:
+builder.Services.AddTypeSafeClient(options =>
+{
+    var openjev = OpenJev.Resolve(options, new OpenJevOptions
+    {
+        ApiKey = Environment.GetEnvironmentVariable("OPENJEV_API_KEY"),
+    });
+    options.BaseAddress = openjev.BaseAddress;
+    options.Model = openjev.Model;
+    options.ApiKey = openjev.ApiKey;
+    options.Provider = openjev.Provider;
+});
+```
+
+The OpenJEV base address is derived from the configured TypeSafe base address by swapping the host, so no second endpoint is hard-coded.
+
 ## Installation
 
 Reference the `TypeSafe.Client` project (or package) and register it:

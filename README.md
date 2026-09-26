@@ -2,6 +2,8 @@
 
 .NET tooling for the [TypeSafe AI](https://docs.typesafe.ai/api) **Jev** System One model. Jev evaluates typed **questions** — noul (yes/no), choice (pick an option), and score (rate on a rubric) — against a **state** and returns structured answers with probability distributions and confidence values.
 
+> **OpenJEV support:** Jev is built by [TypeSafe](https://typesafe.ai). This fork keeps TypeSafe as the default and adds optional support for [OpenJEV](https://openjev.sh), a free community gateway to the same Jev model — set `OPENJEV_API_KEY` (or `JEV_PROVIDER=openjev`) to use it. Original project: https://github.com/JawzoD3TH/JevApi by @JawzoD3TH.
+
 Targets **.NET 10**, with source-generated JSON throughout for trimming and native AOT compatibility.
 
 ## Projects

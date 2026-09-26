@@ -20,6 +20,9 @@ public sealed class TypeSafeClientOptions
 
     /// <summary>Request timeout applied to each underlying HTTP attempt. Null uses the HttpClient default.</summary>
     public TimeSpan? Timeout { get; set; }
+
+    /// <summary>Optional provider override: "typesafe" (default) or "openjev". When null, the provider is auto-detected from the configured keys. See <see cref="OpenJev"/>.</summary>
+    public string? Provider { get; set; }
 }
 
 /// <summary>Well-known TypeSafe model names.</summary>
@@ -27,4 +30,7 @@ public static class TypeSafeModels
 {
     /// <summary>Alias for TypeSafe's flagship model.</summary>
     public const string JevLatest = "jev-latest";
+
+    /// <summary>Model id used by the OpenJEV community gateway (the same Jev model, different gateway).</summary>
+    public const string OpenJev = "openjev";
 }

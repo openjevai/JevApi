@@ -254,7 +254,7 @@ public sealed class JevMcpTools
     {
         var warnings = _evaluator.HasApiKey
             ? null
-            : new List<string> { "no API key configured — set TypeSafe:ApiKey in appsettings.json or the TYPESAFE__ApiKey environment variable; evaluate/evaluate_batch will return 'unauthorized'." };
+            : new List<string> { "no API key configured — set TypeSafe:ApiKey in appsettings.json, the TYPESAFE__ApiKey environment variable, or use OpenJEV (OPENJEV_API_KEY / JEV_PROVIDER=openjev); evaluate/evaluate_batch will return 'unauthorized'." };
 
         var response = new HealthResponse
         {
@@ -286,7 +286,7 @@ public sealed class JevMcpTools
                 : api.IsRateLimited
                     ? "The Jev API rate limit was hit (429) even after retries. Wait a few seconds and retry the identical call."
                     : api.IsOverloaded
-                        ? "The Jev API is temporarily overloaded (529) even after retries. Wait a few seconds and retry the identical call."
+                        ? "The Jev API is temporarily overloaded (529/503) even after retries. Wait a few seconds and retry the identical call."
                         : $"Jev API error {(int)api.StatusCode}: {api.ResponseBody}",
             Retryable = api.IsRateLimited || api.IsOverloaded,
         },
